@@ -1,26 +1,18 @@
-
-
-
 const socketController = (socket) => {
-    
-    console.log('Cliente conectado', socket.id );
+    // pantalla de programar colas
+    //http://localhost:8080/
 
-    socket.on('disconnect', () => {
-        console.log('Cliente desconectado', socket.id );
-    });
+    // pantalla de mostrar tiquetes
+    // http://localhost:8080/publico.html
 
-    socket.on('enviar-mensaje', ( payload, callback ) => {
-        
+    socket.on('enviar-mensaje', (payload, callback) => {
+
         const id = 123456789;
-        callback( id );
+        callback(id);
 
-        socket.broadcast.emit('enviar-mensaje', payload );
-
+        socket.broadcast.emit('enviar-mensaje', payload);
     })
-
 }
-
-
 
 module.exports = {
     socketController
