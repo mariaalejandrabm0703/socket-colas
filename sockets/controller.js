@@ -3,20 +3,41 @@ const TicketControl = require('../models/ticket-control');
 const ticketControl = new TicketControl();
 
 const socketController = (socket) => {
-    // pantalla de programar colas
-    //http://localhost:8080/
-
-    // pantalla de mostrar tiquetes
-    // http://localhost:8080/publico.html
-
     this.ticketControl;
 
-    socket.on('enviar-mensaje', (payload, callback) => {
+    socket.on('siguiente-ticket', (payload, callback) => {
+        const siguiente = ticketControl.siguiente();
+        callback(siguiente);
+        socket.broadcast.emit('tickets-pendientes', ticketControl.tickets.length);
+    });
 
-        const id = 123456789;
-        callback(id);
+    socket.emit('ultimo-ticket', ticketControl.ultimo);
+    socket.emit('estado-actual', ticketControl.ultimos4);
+    socket.emit('tickets-pendientes', ticketControl.tickets.length);
 
-        socket.broadcast.emit('enviar-mensaje', payload);
+    socket.on('atender-ticket', ({ escritorio }, callback) => {
+        if (!escritorio) {
+            return callback({
+                ok: false,
+                msg: 'Es escritorio es obligatorio'
+            });
+        }
+        const ticket = ticketControl.atenderTicket(escritorio);
+        socket.broadcast.emit('estado-actual', ticketControl.ultimos4);
+        socket.emit('tickets-pendientes', ticketControl.tickets.length);
+        socket.broadcast.emit('tickets-pendientes', ticketControl.tickets.length);
+
+        if (!ticket) {
+            callback({
+                ok: false,
+                msg: 'Ya no hay tickets pendientes'
+            });
+        } else {
+            callback({
+                ok: true,
+                ticket
+            })
+        }
     })
 }
 
